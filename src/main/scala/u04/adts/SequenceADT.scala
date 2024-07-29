@@ -16,14 +16,22 @@ object SequenceADT:
 
   // operation as extension methods
   extension [A](seq: Sequence[A])
-    def map[B](mapper: A => B): Sequence[B] = seq match
-      case Cons(h, t) => Cons(mapper(h), t.map(mapper))
-      case Nil()      => Nil()
+    def map[B](mapper: A => B): Sequence[B] =
+      seq.flatMap(h => Cons(mapper(h), Nil()))
 
     def filter(f: A => Boolean): Sequence[A] = seq match
       case Cons(h, t) if f(h) => Cons(h, t.filter(f))
-      case Cons(h, t) => t.filter(f)
+      case Cons(_, t) => t.filter(f)
       case Nil() => Nil()
+
+    def flatMap[B](mapper: A => Sequence[B]): Sequence[B] = seq match
+      case Cons(h, t) => mapper(h).append(t.flatMap(mapper))
+      case Nil() => Nil()
+
+    def append(seq2: Sequence[A]): Sequence[A] = seq match
+      case Cons(h, t) => Cons(h, t.append(seq2))
+      case Nil() => seq2
+
 
   // operations as standard methods
   def concat[A](seq1: Sequence[A], seq2: Sequence[A]): Sequence[A] = seq1 match
