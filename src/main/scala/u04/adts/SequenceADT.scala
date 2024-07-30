@@ -1,5 +1,7 @@
 package u04.adts
 
+import scala.annotation.tailrec
+
 object SequenceADT:
   // implementation of data structure: fully hidden
   private enum SequenceImpl[E]:
@@ -32,6 +34,18 @@ object SequenceADT:
       case Cons(h, t) => Cons(h, t.append(seq2))
       case Nil() => seq2
 
+    @tailrec
+    def foldLeft[B](acc: B)(op: (B, A) => B): B = seq match
+      case Cons(h, t) => t.foldLeft(op(acc, h))(op)
+      case Nil() => acc
+
+    def foldRight[B](acc: B)(op: (A, B) => B): B = seq match
+      case Cons(h, t) => op(h, t.foldRight(acc)(op))
+      case Nil() => acc
+
+    def reduce(op: (A, A) => A): A = seq match
+      case Cons(h, t) => t.foldLeft(h)(op)
+      case Nil() => throw UnsupportedOperationException()
 
   // operations as standard methods
   def concat[A](seq1: Sequence[A], seq2: Sequence[A]): Sequence[A] = seq1 match
