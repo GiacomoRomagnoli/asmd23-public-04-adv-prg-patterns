@@ -1,5 +1,7 @@
 package u04.adts
 
+import u04.monads.Optionals.Optional.Just
+
 import scala.annotation.tailrec
 
 object Sequences:
@@ -18,6 +20,8 @@ object Sequences:
       def foldLeft[B](acc: B)(op: (B, A) => B): B
       def foldRight[B](acc: B)(op: (A, B) => B): B
       def reduce(op: (A, A) => A): A
+      def head: Option[A]
+      def tail: Sequence[A]
 /* axioms:
       map(nil, f) = nil
       map(cons(h, t), f) = cons(f(h), map(t, f))
@@ -29,7 +33,7 @@ object Sequences:
       flatMap(cons(h, t), f) = append(f(h), flatMap(t, f))
 
       append(nil, l) = l
-      append(cons(h, t), l) = cons(h, concat(t, l))
+      append(cons(h, t), l) = cons(h, append(t, l))
       
       foldLeft(nil, acc, f) = acc
       foldLeft(cons(h, t), acc, f) = foldLeft(t, f(acc, h), f)
@@ -55,6 +59,8 @@ object Sequences:
       override def foldLeft[B](acc: B)(op: (B, A) => B): B = seq.foldLeft(acc)(op)
       override def foldRight[B](acc: B)(op: (A, B) => B): B = seq.foldRight(acc)(op)
       override def reduce(op: (A, A) => A): A = seq.reduce(op)
+      override def head: Option[A] = seq.headOption
+      override def tail: Sequence[A] = seq.drop(1)
 
 
   // Cons|Nil implementation \\
@@ -99,3 +105,11 @@ object Sequences:
       override def reduce(op: (A, A) => A): A = seq match
         case Cons(h, t) => t.foldLeft(h)(op)
         case Nil() => throw UnsupportedOperationException()
+        
+      override def head: Option[A] = seq match
+        case Cons(h, t) => Some(h)
+        case Nil() => None
+        
+      override def tail: Sequence[A] = seq match
+        case Cons(h, t) => t
+        case _ => Nil()
