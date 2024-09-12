@@ -13,6 +13,7 @@ class SwingFunctionalFacade {
         Frame addButton(String text, String name);
         Frame addLabel(String text, String name);
         Frame addSpinner(int current, int min, int max, int step, String name);
+        int getSpinner(String name);
         Frame showToLabel(String text, String name);
         Frame show();
         Supplier<String> events();        
@@ -81,6 +82,11 @@ class SwingFunctionalFacade {
             this.spinners.put(name, js);
             this.jframe.getContentPane().add(js);
             return this;
+        }
+        
+        @Override
+        public int getSpinner(String name) {
+            return (Integer) this.spinners.get(name).getValue();
         }
 
         @Override

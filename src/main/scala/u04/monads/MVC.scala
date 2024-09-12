@@ -1,15 +1,18 @@
 package u04.monads
 
+import u04.monads.States.State
+
+def mv[SM, SV, AM, AV](m1: State[SM,AM], f: AM => State[SV,AV]): State[(SM,SV), AV] =
+  State:
+    case (sm, sv) =>
+      val (sm2, am) = m1.run(sm)
+      val (sv2, av) = f(am).run(sv)
+      ((sm2, sv2), av)
+
 @main def runMVC =
   import Monads.*, Monad.*, States.*, State.*, CounterStateImpl.*, WindowStateImpl.*
   import u04.datastructures.Streams.*
 
-  def mv[SM, SV, AM, AV](m1: State[SM,AM], f: AM => State[SV,AV]): State[(SM,SV), AV] = 
-    State:
-      case (sm, sv) => 
-        val (sm2, am) = m1.run(sm)
-        val (sv2, av) = f(am).run(sv)
-        ((sm2, sv2), av)
 
   def windowCreation(str: String): State[Window, Stream[String]] = for 
     _ <- setSize(300, 300)
@@ -35,23 +38,32 @@ package u04.monads
 
 @main def drawNumberGame =
   import WindowStateImpl.*
+  import scala.u04.monads.SchrodingerStateImpl.{guess, nop, pick}
   import u04.monads.Monads.Monad.seqN
-  
+
   val view = for
     _ <- setSize(300, 300)
     _ <- addButton("quit", "QuitButton")
     _ <- addSpinner(0, 0, 10, 1, "number")
     _ <- addButton("guess", "GuessButton")
-    _ <- addLabel("too high!", "OutPutLabel")
+    _ <- addLabel("can you guess it?", "OutPutLabel")
     _ <- show()
-  yield ()
-  
+    events <- eventStream()
+  yield events
+
+  // per dare un numero di vite potrei fare in modo che lo stato di
+  // Schrodinger abbia come effetto una tupla Stringa Intero
   val controller = for
-    _ <- view
-    e <- eventStream()
+    e <- mv(nop, _ => view)
     _ <- seqN(e.map {
-      case "QuitButton" => exec(sys.exit())
+      case "QuitButton" => mv(nop, _ => exec(sys.exit()))
+      case "GuessButton" => for
+        n <- mv(nop, _ => getSpinner("number"))
+        _ <- mv(guess(n), i => toLabel(i, "OutPutLabel"))
+      yield ()
     })
   yield ()
-  
-  controller.run(initialWindow)
+
+  val p = pick
+  println("number to guess: " + p)
+  controller.run((p, initialWindow))
