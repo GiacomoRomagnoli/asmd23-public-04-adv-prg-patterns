@@ -9,6 +9,7 @@ trait WindowState:
   def setSize(width: Int, height: Int): State[Window, Unit]
   def addButton(text: String, name: String): State[Window, Unit]
   def addLabel(text: String, name: String): State[Window, Unit]
+  def addSpinner(current: Int, min: Int, max: Int, step: Int, name: String): State[Window, Unit]
   def toLabel(text: String, name: String): State[Window, Unit]
   def show(): State[Window, Unit]
   def exec(cmd: =>Unit): State[Window, Unit]
@@ -28,6 +29,8 @@ object WindowStateImpl extends WindowState:
     State(w => ((w.addButton(text, name)), {}))
   def addLabel(text: String, name: String): State[Window, Unit] =
     State(w => ((w.addLabel(text, name)), {}))
+  def addSpinner(current: Int, min: Int, max: Int, step: Int, name: String): State[Frame, Unit] =
+    State(w => (w.addSpinner(current, min, max, step, name), {}))
   def toLabel(text: String, name: String): State[Window, Unit] =
     State(w => ((w.showToLabel(text, name)), {}))
   def show(): State[Window, Unit] =
