@@ -12,6 +12,7 @@ class SwingFunctionalFacade {
         Frame setSize(int width, int height);
         Frame addButton(String text, String name);
         Frame addLabel(String text, String name);
+        Frame addSpinner(int current, int min, int max, int step, String name);
         Frame showToLabel(String text, String name);
         Frame show();
         Supplier<String> events();        
@@ -31,6 +32,7 @@ class SwingFunctionalFacade {
         private final JFrame jframe = new JFrame();
         private final Map<String, JButton> buttons = new HashMap<>();
         private final Map<String, JLabel> labels = new HashMap<>();
+        private final Map<String, JSpinner> spinners = new HashMap<>();
         private final LinkedBlockingQueue<String> eventQueue = new LinkedBlockingQueue<>();
         private final Supplier<String> events = () -> {
             try{
@@ -68,6 +70,16 @@ class SwingFunctionalFacade {
             JLabel jl = new JLabel(text);
             this.labels.put(name, jl);
             this.jframe.getContentPane().add(jl);
+            return this;
+        }
+
+        @Override
+        public Frame addSpinner(int current, int min, int max, int step, String name) {
+            JSpinner js = new JSpinner(new SpinnerNumberModel(current, min, max, step));
+            js.setName(name);
+            ((JSpinner.DefaultEditor) js.getEditor()).getTextField().setEditable(false);
+            this.spinners.put(name, js);
+            this.jframe.getContentPane().add(js);
             return this;
         }
 
