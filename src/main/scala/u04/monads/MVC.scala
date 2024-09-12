@@ -32,3 +32,26 @@ package u04.monads
   yield ()
 
   controller.run((initialCounter(), initialWindow))
+
+@main def drawNumberGame =
+  import WindowStateImpl.*
+  import u04.monads.Monads.Monad.seqN
+  
+  val view = for
+    _ <- setSize(300, 300)
+    _ <- addButton("quit", "QuitButton")
+    _ <- addSpinner(0, 0, 10, 1, "number")
+    _ <- addButton("guess", "GuessButton")
+    _ <- addLabel("too high!", "OutPutLabel")
+    _ <- show()
+  yield ()
+  
+  val controller = for
+    _ <- view
+    e <- eventStream()
+    _ <- seqN(e.map {
+      case "QuitButton" => exec(sys.exit())
+    })
+  yield ()
+  
+  controller.run(initialWindow)
